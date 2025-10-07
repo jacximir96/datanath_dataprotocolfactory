@@ -11,7 +11,6 @@ using infrastructure.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NATS.Client.Core;
 using Serilog;
 using System;
 
@@ -22,6 +21,8 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 //var builder = WebApplication.CreateBuilder(args);
 var builder = Host.CreateApplicationBuilder(args);
+builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen();
 builder.Services.AddHostedService<NatsWorker>();
 builder.Services.AddMemoryCache();
 // Add services to the container.
@@ -42,9 +43,8 @@ builder.Services.AddScoped<IEntityRepository<Entity1>, EntityRepository>();
 builder.Services.AddScoped<ITransFormRepository<Transform>, TransFormRepository>();
 builder.Services.AddScoped<ITargetConfigRepository, TargetConfigRepository>();
 builder.Services.AddScoped<ISubRequestRepository<SubRequest>, SubRequestRepository>();
-builder.Services.AddScoped<ICollectionStoreRepository<CollectionStore>, CollectionStoreRepository>();   
-//builder.Host.UseSerilog();
-
+builder.Services.AddScoped<ICollectionStoreRepository<CollectionStore>, CollectionStoreRepository>();
 var app = builder.Build();
+
 await app.RunAsync();
 
