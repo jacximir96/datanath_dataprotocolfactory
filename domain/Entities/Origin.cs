@@ -4,18 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace domain.Entities.LoadsConnections
+namespace domain.Entities
 {
-    public class LoadConnection
+    public class Origin
     {
-        public string server { get; set; }
-        public string port { get; set; }
+        public string servidor { get; set; }
+        public string puerto { get; set; }
         public string user { get; set; }
         public string password { get; set; }
         public string repository { get; set; }
         public string adapter { get; set; }
-        public string? sasToken { get; set; }
-        public string? originRepository { get; set; }
-
     }
 }

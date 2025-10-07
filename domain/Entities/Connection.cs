@@ -16,6 +16,7 @@ namespace domain.Entities
         public string repository { get; set; }
         public string adapter { get; set; }
         public string sasToken { get; set; }
+        public string? originRepository { get; set; }
 
     }
 }

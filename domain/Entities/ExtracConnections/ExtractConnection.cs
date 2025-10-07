@@ -13,8 +13,7 @@ namespace domain.Entities.ExtracConnections
         public string user { get; set; }
         public string password { get; set; }
         public string repository { get; set; }
-        public string adapter { get; set; }
-        public string sasToken {get; set; }   
+        public string adapter { get; set; }        
 
     }
 }

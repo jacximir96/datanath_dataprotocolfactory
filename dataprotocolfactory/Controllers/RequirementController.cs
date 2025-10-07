@@ -11,10 +11,10 @@ namespace datamanager.Controllers
     [ApiController]
     public class RequirementController : ControllerBase
     {
-        private readonly IRequirement _store;  
-        public RequirementController(IRequirement store) 
+        private readonly IRequirement _requirement;  
+        public RequirementController(IRequirement requirement) 
         { 
-            _store = store;
+            _requirement=requirement;
         }
 
         [HttpGet]
@@ -22,7 +22,7 @@ namespace datamanager.Controllers
         {
             try
             {
-                var response =await _store.GetRequirement(idrequirement);
+                var response =await _requirement.GetRequirement(idrequirement);
                 return Ok(response);    
             }
             catch (Exception e)

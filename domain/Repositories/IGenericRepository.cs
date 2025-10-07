@@ -11,6 +11,7 @@ namespace domain.Repositories
     public interface IGenericRepository<T> where T : class
     {
         Task<T> GetRequirement(string idrequirement, Connection connection);
+        Task Update(T requirement, Connection connection);
 
     }
 }

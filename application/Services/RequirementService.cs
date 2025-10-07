@@ -70,8 +70,7 @@ namespace application.Services
             Connection serverLoadData = null;
             List<Entity1> entities = new List<Entity1>();      
             var count = 0;
-            var quantity = 0;
-            List<CollectionStore> collection = null;
+            var quantity = 0;      
             Requirement requirement = null;
             LoadConnection loadConnection = null;
             List<EntityTarget> entityTargets = null;
@@ -90,22 +89,14 @@ namespace application.Services
                     _cache.Set(_configuration.GetSection("cacherequirement").Value, requirement, TimeSpan.FromSeconds(30));
                 }
 
-                collection = _cache.Get<List<CollectionStore>>(_configuration.GetSection("cachecollection").Value);
-                if (collection == null)
-                {
-                    collection = await _collectionStoreRepo.GetCollectionStore(connection.adapter, connection);
-                    _cache.Set(_configuration.GetSection("cachecollection").Value, requirement, TimeSpan.FromSeconds(30));
-                }
 
-                foreach (var c in collection)
+                foreach (var c in requirement.origins)
                 {
-                        foreach (var s in c.stores)
-                        {
 
                         this.response = new ResponseDomain();
                             this.response.template = SetTemplate();
-                            ExtractConfiguration extractConfig = SetExtractConfiguration(s);
-                            quantity = c.stores.Count;
+                            ExtractConfiguration extractConfig = SetExtractConfiguration(c);
+                            quantity = requirement.origins.Count;
 
                             foreach (var t in requirement.entities)
                             {
@@ -146,6 +137,7 @@ namespace application.Services
                                this.response.template.processes.LOADS.ForEach(l =>
                                 {
                                     l.configuration.connection = SetLoadConnection(l, requirement);
+                                    l.configuration.connection.originRepository = c.repository;
                                     l.configuration.entities = requirement.target.entities;
                                 });
 
@@ -165,7 +157,8 @@ namespace application.Services
                                     }
                                 }
 
-                                this.response = await ValidateConnections(s.server, s.adapter, s.user, s.password, s.port,requirement.target.connection.sasToken, connection);
+                                this.response = await ValidateConnections(c.servidor, c.adapter, c.user, c.password, c.puerto
+                                    ,requirement.target.connection.sasToken, connection);
                                if(this.response.Error)
                                    return this.response;
 
@@ -174,6 +167,7 @@ namespace application.Services
                                 this.response.template.processes.LOADS.ForEach(l =>
                                 {
                                     l.configuration = configuration;
+                                    l.configuration.connection.originRepository = c.repository;
                                 });
                             }
 
@@ -183,18 +177,19 @@ namespace application.Services
                             pipeline.chunkLoad=this.response.template.chunkLoad;
                             pipeline.processes=this.response.template.processes;
                      
-                            string subrequestId=await _subRequestRepo.Create(SetSubRequest(idrequirement, s, pipeline), connection);
+                            string subrequestId=await _subRequestRepo.Create(SetSubRequest(idrequirement,requirement.Client ,c, pipeline), connection);
                             requirement.estado = _configuration.GetSection("status_expanded").Value;                           
                             NatsRequest request = SetNatsRequest(idrequirement, subrequestId, _configuration.GetSection("event_request_expanded").Value);
 
                             _templateLogDomain.GenerateLog($"{_configuration.GetSection("logmessage1").Value} {this.response.template.syncId} {_configuration.GetSection("logmessage1").Value}");
                              var res = await _sendEtl.SendRequirement(this.response.template);
 
+                            await _repository.Update(requirement, connection);
+                           
                             count = count + 1;
                             if (count==quantity)                                                                                     
                                  return null;
-                                                                                   
-                        }                   
+                                                                                                             
                 }        
             }
             catch (Exception e)
@@ -242,14 +237,14 @@ namespace application.Services
             return response;
         }
 
-        private ExtractConfiguration SetExtractConfiguration(Store s) 
+        private ExtractConfiguration SetExtractConfiguration(Origin s) 
         {
             ExtractConfiguration extractConfig = new ExtractConfiguration();
             extractConfig.connection = new ExtractConnection();
-            extractConfig.connection.port = s.port;
+            extractConfig.connection.port = s.puerto;
             extractConfig.connection.password = s.password;
             extractConfig.connection.user = s.user;
-            extractConfig.connection.server = s.server;
+            extractConfig.connection.server = s.servidor;
             extractConfig.connection.adapter = s.adapter;
             extractConfig.connection.repository = s.repository;
 
@@ -296,6 +291,7 @@ namespace application.Services
             l.configuration.connection.adapter = requirement.target.connection.adapter;
             l.configuration.connection.port = requirement.target.connection.port;
             l.configuration.connection.sasToken = requirement.target.connection.sasToken;
+            l.configuration.connection.originRepository = requirement.target.connection.originRepository;
             return l.configuration.connection;
 
         }
@@ -316,14 +312,15 @@ namespace application.Services
             return response.template.processes.LOADS;
         }
 
-        private SubRequest SetSubRequest(string idrequirement, Store a, Pipeline pipeline)
+        private SubRequest SetSubRequest(string idrequirement,string client, 
+            Origin a, Pipeline pipeline)
         {
             SubRequest subRequest = new SubRequest 
             {
-                id = idrequirement + a.storeId,
+                id = idrequirement + client,
                 parentRequest = idrequirement,
                 status = _configuration.GetSection("status1").Value,
-                store = a.storeId,
+                store = client,
                 createdAt = DateTime.Now,
                 pipeline = pipeline
             };
@@ -356,7 +353,7 @@ namespace application.Services
             ResponseDomain res = null;
             if (adapter == "MongoLocal")
             {
-                connection = SetConnection(server, adapter, user, password, port);
+                connection = SetConnection(connection.server,connection.adapter,connection.user,connection.password,connection.port);
                 res= await ValidateCosmosConnection(connection);
                 this.response.Error = res.Error;
                 this.response.StatusCode = res.StatusCode;

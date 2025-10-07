@@ -10,6 +10,7 @@ namespace domain.Entities
     {
         public string name { get; set; }
         public string toName { get; set; }
+        public string format { get; set; }
         public List<PropertyTarget> properties { get; set; }
         public List<Filter> filters { get; set; } = new List<Filter>();
         

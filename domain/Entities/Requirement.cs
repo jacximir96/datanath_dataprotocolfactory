@@ -10,6 +10,8 @@ namespace domain.Entities
     public class Requirement
     {
         public string? id { get; set; }
+        public string? Client { get; set; }
+        public List<Origin>? origins { get; set; }
         public string serviceDesk { get; set; }
         public Store stores { get; set; }
         public string entity { get; set; }
