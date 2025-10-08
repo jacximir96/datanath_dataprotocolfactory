@@ -55,8 +55,6 @@ if (auxApp.Environment.IsDevelopment())
     appBuilt.UseSwagger();
     appBuilt.UseSwaggerUI();
 }
-//await app.RunAsync();
-appBuilt.Run();
 await app.RunAsync();
   
 
