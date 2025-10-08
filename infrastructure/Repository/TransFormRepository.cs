@@ -1,15 +1,9 @@
 ﻿using domain.Entities;
-using domain.Entities.Collections;
 using domain.Interfaces;
 using domain.Repositories;
-using infrastructure.Factory;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace infrastructure.Repository
 {
@@ -38,10 +32,8 @@ namespace infrastructure.Repository
                             var _response = await query.ReadNextAsync();
                             collections.AddRange(_response.ToList());
                         }
-
                     }
                 }
-
             }
             catch (Exception e)
             {

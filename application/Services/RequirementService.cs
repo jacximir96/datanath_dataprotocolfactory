@@ -7,12 +7,8 @@ using domain.Interfaces;
 using domain.Repositories;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Net;
-using System.Text.Json;
 
 
 namespace application.Services
@@ -29,8 +25,7 @@ namespace application.Services
         private readonly ITestConnection _testConnection;
         private readonly ISendEtl _sendEtl;
         private readonly ITransFormRepository<Transform> _transFormRepo;
-        private readonly ITargetConfigRepository _targetConfigRepo;
-        private readonly ICollectionStoreRepository<CollectionStore> _collectionStoreRepo;
+        private readonly ITargetConfigRepository _targetConfigRepo;     
         private readonly IMemoryCache _cache;
 
         public RequirementService(
@@ -43,8 +38,7 @@ namespace application.Services
             ISendEtl sendEtl,
             ITransFormRepository<Transform> transFormRepo,
             ITargetConfigRepository targetConfigRepo,
-            ISubRequestRepository<SubRequest> subRequestRepo,
-            ICollectionStoreRepository<CollectionStore> collectionStoreRepo,
+            ISubRequestRepository<SubRequest> subRequestRepo,           
             IMemoryCache cache
             ) 
         { 
@@ -57,8 +51,7 @@ namespace application.Services
             _testConnection = testConnection;
             _sendEtl = sendEtl;
             _transFormRepo = transFormRepo; 
-            _subRequestRepo = subRequestRepo;
-            _collectionStoreRepo = collectionStoreRepo;
+            _subRequestRepo = subRequestRepo;           
             _cache = cache;
                       
         }
@@ -181,10 +174,11 @@ namespace application.Services
                             requirement.estado = _configuration.GetSection("status_expanded").Value;                           
                             NatsRequest request = SetNatsRequest(idrequirement, subrequestId, _configuration.GetSection("event_request_expanded").Value);
 
-                            _templateLogDomain.GenerateLog($"{_configuration.GetSection("logmessage1").Value} {this.response.template.syncId} {_configuration.GetSection("logmessage1").Value}");
+                            _templateLogDomain.GenerateLog($"{ResourceApp.LogMessageRequirement} {this.response.template.syncId} {ResourceApp.LogMessageRequirementComplement}");
                              var res = await _sendEtl.SendRequirement(this.response.template);
 
                             await _repository.Update(requirement, connection);
+                            _templateLogDomain.GenerateLog($"{ResourceApp.RequirementUpdate} {requirement.id} {ResourceApp.RequirementUpdateComplement}");
                            
                             count = count + 1;
                             if (count==quantity)                                                                                     
@@ -195,6 +189,7 @@ namespace application.Services
             catch (Exception e)
             {
                 e.Message.ToString();
+                _templateLogDomain.GenerateLog($"Error: {e.Message}");  
             }
      
             return this.response;

@@ -23,8 +23,8 @@ namespace infrastructure.Factory
             switch (dataBase) 
             {
                 case "SqlServerSP":
-
-                    connectioDataBase=new SqlServerDataBase(_configuration);
+                
+                    connectioDataBase =new SqlServerDataBase(_configuration);
                     
                     break;
 

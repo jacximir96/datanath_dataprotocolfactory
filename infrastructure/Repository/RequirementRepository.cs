@@ -1,28 +1,8 @@
-﻿using Azure.Core;
-using Azure.Identity;
-using Azure.Monitor.Query;
-using Azure.Monitor.Query.Models;
-using domain.Entities;
-using domain.Entities.Collections;
-using domain.Entities.LoadsConnections;
+﻿using domain.Entities;
 using domain.Interfaces;
 using domain.Repositories;
-using infrastructure.Factory;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow.Schemas;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
-using static Azure.Core.HttpHeader;
 using PartitionKey = Microsoft.Azure.Cosmos.PartitionKey;
 
 namespace infrastructure.Repository

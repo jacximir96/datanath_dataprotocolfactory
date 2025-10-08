@@ -13,18 +13,19 @@ namespace infrastructure.Repository
 {
     public class RequirementLog:ITemplateLogDomain
     {
-       
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<RequirementLog> _logger;
+        public RequirementLog(IConfiguration configuration, ILogger<RequirementLog> logger) 
+        { 
+            _configuration = configuration;
+            _logger = logger;
+        }
+
         public void GenerateLog(string message)
         {
             try
-            {
-                
-                using(var _file=File.OpenWrite("E:\\repo-data-protocol-factory\\dataprotocolfactory\\logs\\log.txt")) 
-                {
-                     byte[] bytes = Encoding.UTF8.GetBytes(message);                  
-                    _file.Write(bytes, 0, bytes.Length);
-                }
-
+            {             
+                _logger.LogCritical(message);   
             }
             catch (Exception e)
             {

@@ -35,7 +35,7 @@ namespace infrastructure.Adapter
                         string j = await response.Content.ReadAsStringAsync();                       
                         ResponseDomain responseDomain = new ResponseDomain();
                         responseDomain.data = j;
-                        responseDomain.Message = $"requerimiento {template.syncId} enviado con exito";
+                        responseDomain.Message = $"{ResourceInfra.MessageRequirement} {template.syncId} {ResourceInfra.MessageRequirementComplement}";
                         response.StatusCode=System.Net.HttpStatusCode.OK;
                 }
 

@@ -20,6 +20,5 @@ namespace domain.Entities
         public string transformationKey { get; set; }
         public Target target { get; set; }
         public string estado { get; set; }
-        public Meta meta { get; set; }
     }
 }

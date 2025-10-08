@@ -38,13 +38,13 @@ namespace infrastructure.Adapter
                 {
                     await con.OpenAsync();                
                     response.Error = false;
-                    response.Message = "La conexión fué exitosa";
+                    response.Message = ResourceInfra.SqlTestConnectionOk;
                 }
             }
             catch (Exception e)
             {
                 response.Error = true;
-                response.Message = "Datos de conexión invalidos";
+                response.Message = ResourceInfra.SqlTestConnectionError;
                 return response;
             }
 
@@ -71,7 +71,7 @@ namespace infrastructure.Adapter
                         }
                     }
                     response.Error = false;
-                    response.Message = "conexión exitosa";
+                    response.Message = ResourceInfra.CosmosTestConnectionOk;
 
                 }
                 return await Task.FromResult(response);
@@ -79,7 +79,7 @@ namespace infrastructure.Adapter
             catch (Exception e) 
             { 
                 response.Error= true;
-                response.Message = "Conexión invalida";
+                response.Message = ResourceInfra.CosmosTestConnectionError;
                 return response;
             }
         }
