@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
+using System.Threading.Tasks;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -55,6 +56,8 @@ if (auxApp.Environment.IsDevelopment())
     appBuilt.UseSwagger();
     appBuilt.UseSwaggerUI();
 }
-await app.RunAsync();
+var workerTask=app.RunAsync();
+var apiTask = appBuilt.RunAsync();
+await Task.WhenAny(workerTask,apiTask);
   
 

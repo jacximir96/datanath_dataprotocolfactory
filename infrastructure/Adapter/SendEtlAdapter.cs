@@ -22,14 +22,8 @@ namespace infrastructure.Adapter
         {
             dynamic _response=null;
             try
-            {
-               
-
-             Console.WriteLine(template.processes.LOADS==null ? "load is null":"load is not null");
-             Console.WriteLine(template.processes.TRANSFORMS == null ? "transform is null" : "transform is not null");
-             Console.WriteLine(template.processes.EXTRACTS == null ? "EXTRACTS is null" : "EXTRACTS is not null");
-
-                using (var client = new HttpClient())
+            {             
+                    using (var client = new HttpClient())
                     {
                         var request = new HttpRequestMessage(HttpMethod.Post, _configuration.GetSection("urletl").Value);
                         var json = JsonConvert.SerializeObject(template);
