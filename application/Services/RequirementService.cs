@@ -19,7 +19,6 @@ namespace application.Services
         private readonly IConfiguration _configuration;
         private readonly ISubRequestRepository<SubRequest> _subRequestRepo;
         private readonly IEntityRepository<Entity1> _entityRepository;
-        private ResponseDomain response = null;
         private readonly ITemplateLogDomain _templateLogDomain;
         private readonly IConnectioDataBaseDomain _connection;
         private readonly ITestConnection _testConnection;
@@ -86,8 +85,8 @@ namespace application.Services
                 foreach (var c in requirement.origins)
                 {
 
-                        this.response = new ResponseDomain();
-                            this.response.template = SetTemplate();
+                            response = new ResponseDomain();
+                            response.template = SetTemplate(response);
                             ExtractConfiguration extractConfig = SetExtractConfiguration(c);
                             quantity = requirement.origins.Count;
 
@@ -102,7 +101,7 @@ namespace application.Services
                                 });
                             }
 
-                            this.response.template.processes.EXTRACTS.Add(new Extract
+                            response.template.processes.EXTRACTS.Add(new Extract
                             {
                                 code = _configuration.GetSection("extractcode").Value,
                                 withResponse = true,
@@ -114,20 +113,20 @@ namespace application.Services
 
                             LoadConfiguration configuration = new LoadConfiguration();                            
                             connection = SetConnection(_configuration.GetSection("endpoint").Value, _configuration.GetSection("adapter").Value,"", _configuration.GetSection("key").Value,"");
-                            this.response.template.processes.TRANSFORMS = await _transFormRepo.GetTransforms(connection);
-                            this.response.template.processes.LOADS = SetLoads(requirement,idrequirement, configuration, this.response);
-
-
-                            if (requirement.target.connection.user != "" || requirement.target.connection.password != "" || 
+                            response.template.processes.TRANSFORMS = await _transFormRepo.GetTransforms(connection);
+                            response.template.processes.LOADS = SetLoads(requirement,idrequirement, configuration, response);
+                            Console.WriteLine(response.template.processes.LOADS);
+                            Console.WriteLine(response.template.processes.TRANSFORMS);
+                           if (requirement.target.connection.user != "" || requirement.target.connection.password != "" || 
                             requirement.target.connection.server !="" || requirement.target.connection.adapter !="")
                             {
                                
-                              this.response = await ValidateConnections(requirement.target.connection.server, requirement.target.connection.adapter, requirement.target.connection.user, 
-                                  requirement.target.connection.password, requirement.target.connection.port, requirement.target.connection.sasToken,connection);
-                                if(this.response.Error)
-                                    return this.response;   
+                              response = await ValidateConnections(requirement.target.connection.server, requirement.target.connection.adapter, requirement.target.connection.user, 
+                                  requirement.target.connection.password, requirement.target.connection.port, requirement.target.connection.sasToken,connection, response);
+                                if(response.Error)
+                                    return response;   
                                 
-                               this.response.template.processes.LOADS.ForEach(l =>
+                               response.template.processes.LOADS.ForEach(l =>
                                 {
                                     l.configuration.connection = SetLoadConnection(l, requirement);
                                     l.configuration.connection.originRepository = c.repository;
@@ -150,14 +149,14 @@ namespace application.Services
                                     }
                                 }
 
-                                this.response = await ValidateConnections(c.servidor, c.adapter, c.user, c.password, c.puerto
-                                    ,requirement.target.connection.sasToken, connection);
-                               if(this.response.Error)
-                                   return this.response;
+                                response = await ValidateConnections(c.servidor, c.adapter, c.user, c.password, c.puerto
+                                    ,requirement.target.connection.sasToken, connection, response);
+                               if(response.Error)
+                                   return response;
 
                                 configuration.connection = loadConnection;
                                 configuration.entities = requirement.target.entities;
-                                this.response.template.processes.LOADS.ForEach(l =>
+                                response.template.processes.LOADS.ForEach(l =>
                                 {
                                     l.configuration = configuration;
                                     l.configuration.connection.originRepository = c.repository;
@@ -165,17 +164,17 @@ namespace application.Services
                             }
 
                             Pipeline pipeline = new Pipeline();
-                            pipeline.code = this.response.template.code;
+                            pipeline.code = response.template.code;
                             pipeline.syncId = idrequirement; 
-                            pipeline.chunkLoad=this.response.template.chunkLoad;
-                            pipeline.processes=this.response.template.processes;
+                            pipeline.chunkLoad=response.template.chunkLoad;
+                            pipeline.processes=response.template.processes;
                      
                             string subrequestId=await _subRequestRepo.Create(SetSubRequest(idrequirement,requirement.Client ,c, pipeline), connection);
                             requirement.estado = _configuration.GetSection("status_expanded").Value;                           
                             NatsRequest request = SetNatsRequest(idrequirement, subrequestId, _configuration.GetSection("event_request_expanded").Value);
 
-                            _templateLogDomain.GenerateLog($"{ResourceApp.LogMessageRequirement} {this.response.template.syncId} {ResourceApp.LogMessageRequirementComplement}");
-                             var res = await _sendEtl.SendRequirement(this.response.template);
+                            _templateLogDomain.GenerateLog($"{ResourceApp.LogMessageRequirement} {response.template.syncId} {ResourceApp.LogMessageRequirementComplement}");
+                             var res = await _sendEtl.SendRequirement(response.template);
 
                             await _repository.Update(requirement, connection);
                             _templateLogDomain.GenerateLog($"{ResourceApp.RequirementUpdate} {requirement.id} {ResourceApp.RequirementUpdateComplement}");
@@ -192,7 +191,7 @@ namespace application.Services
                 _templateLogDomain.GenerateLog($"Error: {e.Message}");  
             }
      
-            return this.response;
+            return response;
         }
 
         public async Task<ResponseDomain> ValidateSqlConnection(Connection connection)
@@ -263,17 +262,17 @@ namespace application.Services
         
         }
 
-        private Template SetTemplate() 
+        private Template SetTemplate(ResponseDomain response) 
         {
-            this.response.template = new Template();
-            this.response.template.syncId = Guid.NewGuid().ToString();
-            this.response.template.code = _configuration.GetSection("maincode").Value;
-            this.response.template.chunkLoad = int.Parse(_configuration.GetSection("chunkLoad").Value);
-            this.response.template.withCache = bool.Parse(_configuration.GetSection("withCache").Value);
-            this.response.template.withResponse = bool.Parse(_configuration.GetSection("withResponse").Value);
-            this.response.template.processes = new Processes();
-            this.response.template.processes.EXTRACTS = new List<Extract>();
-            return this.response.template;
+            response.template = new Template();
+            response.template.syncId = Guid.NewGuid().ToString();
+            response.template.code = _configuration.GetSection("maincode").Value;
+            response.template.chunkLoad = int.Parse(_configuration.GetSection("chunkLoad").Value);
+            response.template.withCache = bool.Parse(_configuration.GetSection("withCache").Value);
+            response.template.withResponse = bool.Parse(_configuration.GetSection("withResponse").Value);
+            response.template.processes = new Processes();
+            response.template.processes.EXTRACTS = new List<Extract>();
+            return response.template;
         }
 
         private LoadConnection SetLoadConnection(Load l,Requirement requirement) 
@@ -291,11 +290,14 @@ namespace application.Services
 
         }
 
-        private List<Load> SetLoads(Requirement requirement, string idrequirement, LoadConfiguration config, ResponseDomain res) 
+        private List<Load> SetLoads(Requirement requirement, 
+            string idrequirement, 
+            LoadConfiguration config, 
+            ResponseDomain response) 
         {
-            this.response = res;
-            this.response.template.processes.LOADS = new List<Load>();
-            this.response.template.processes.LOADS.Add(new Load
+            
+            response.template.processes.LOADS = new List<Load>();
+            response.template.processes.LOADS.Add(new Load
             {
                 code = _configuration.GetSection("loadcode").Value,
                 syncId = idrequirement,              
@@ -342,7 +344,8 @@ namespace application.Services
             string password,
             string port ,
             string sasToken,
-            Connection connection
+            Connection connection,
+            ResponseDomain response
             ) 
         {
             ResponseDomain res = null;
@@ -350,9 +353,9 @@ namespace application.Services
             {
                 connection = SetConnection(connection.server,connection.adapter,connection.user,connection.password,connection.port);
                 res= await ValidateCosmosConnection(connection);
-                this.response.Error = res.Error;
-                this.response.StatusCode = res.StatusCode;
-                this.response.Message = res.Message;
+                response.Error = res.Error;
+                response.StatusCode = res.StatusCode;
+                response.Message = res.Message;
             }
             else
             {
@@ -360,9 +363,9 @@ namespace application.Services
                 {
                     connection = SetConnection(server, adapter, user, password, port);
                     res = await ValidateSqlConnection(connection);   
-                    this.response.Error =res.Error;
-                    this.response.StatusCode = res.StatusCode;  
-                    this.response.Message= res.Message; 
+                    response.Error =res.Error;
+                    response.StatusCode = res.StatusCode;  
+                    response.Message= res.Message; 
                 }
 
                 if (adapter == "blobStorage")
@@ -370,14 +373,14 @@ namespace application.Services
                     connection = SetConnection(server, adapter, user, password, port);
                     connection.sasToken = sasToken;
                     res = await ValidateBlobStorageConnection(connection);
-                    this.response.Error = res.Error;
-                    this.response.StatusCode = res.StatusCode;
-                    this.response.Message = res.Message;
+                    response.Error = res.Error;
+                    response.StatusCode = res.StatusCode;
+                    response.Message = res.Message;
                 }
 
             }
 
-            return this.response;
+            return response;
         }
     }
 }

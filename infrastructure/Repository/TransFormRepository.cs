@@ -24,7 +24,7 @@ namespace infrastructure.Repository
                 using (CosmosClient cosmos = (CosmosClient)_connection.CreateConnection(connection.adapter).GetObjectDataBase(connection))
                 {
                     var container = cosmos.GetDatabase(_configuration.GetSection("cosmosdb").Value).GetContainer(_configuration.GetSection("transformscontainer").Value);
-                    using (var query = container.GetItemQueryIterator<Transform>())
+                    using (var query =container.GetItemQueryIterator<Transform>())
                     {
 
                         while (query.HasMoreResults)

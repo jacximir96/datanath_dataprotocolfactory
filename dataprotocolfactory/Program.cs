@@ -7,6 +7,7 @@ using domain.Repositories;
 using infrastructure.Adapter;
 using infrastructure.Factory;
 using infrastructure.Repository;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -20,15 +21,16 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = Host.CreateApplicationBuilder(args);
+var auxApp = WebApplication.CreateBuilder(args);
+
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(Log.Logger);
-builder.Services.AddSwaggerGen();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHostedService<NatsWorker>();
 builder.Services.AddMemoryCache();
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
 builder.Services.AddScoped<IGenericRepository<Requirement>, RequirementRepository>();
 builder.Services.AddScoped<IConnectioDataBaseDomain, SqlServerDataBase>();
 builder.Services.AddScoped<IConnectioDataBaseDomain, CosmosDataBase>();
@@ -41,6 +43,20 @@ builder.Services.AddScoped<IEntityRepository<Entity1>, EntityRepository>();
 builder.Services.AddScoped<ITransFormRepository<Transform>, TransFormRepository>();
 builder.Services.AddScoped<ITargetConfigRepository, TargetConfigRepository>();
 builder.Services.AddScoped<ISubRequestRepository<SubRequest>, SubRequestRepository>();
+builder.Services.AddScoped<ISubRequestCompleted, SubRequestCompletedService>();
 var app = builder.Build();
+auxApp.Services.AddEndpointsApiExplorer();
+auxApp.Services.AddSwaggerGen();
+auxApp.Services.AddControllers();
+var appBuilt = auxApp.Build();
+// Configure the HTTP request pipeline.
+if (auxApp.Environment.IsDevelopment())
+{
+    appBuilt.UseSwagger();
+    appBuilt.UseSwaggerUI();
+}
+//await app.RunAsync();
+appBuilt.Run();
 await app.RunAsync();
+  
 
