@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace application.Interfaces
+namespace domain.Interfaces
 {
-    public interface ISubRequestCompleted
+    public interface IResponseDomain
     {
-        Task ReceiveSubRequestCompleted(SubRequestCompleted subReq);
+        ResponseDomain GetResponse(string message, bool isSuccess);
     }
 }

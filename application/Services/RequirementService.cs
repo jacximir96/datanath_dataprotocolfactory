@@ -115,8 +115,6 @@ namespace application.Services
                             connection = SetConnection(_configuration.GetSection("endpoint").Value, _configuration.GetSection("adapter").Value,"", _configuration.GetSection("key").Value,"");
                             response.template.processes.TRANSFORMS = await _transFormRepo.GetTransforms(connection);
                             response.template.processes.LOADS = SetLoads(requirement,idrequirement, configuration, response);
-                            Console.WriteLine(response.template.processes.LOADS);
-                            Console.WriteLine(response.template.processes.TRANSFORMS);
                            if (requirement.target.connection.user != "" || requirement.target.connection.password != "" || 
                             requirement.target.connection.server !="" || requirement.target.connection.adapter !="")
                             {
@@ -170,11 +168,11 @@ namespace application.Services
                             pipeline.processes=response.template.processes;
                      
                             string subrequestId=await _subRequestRepo.Create(SetSubRequest(idrequirement,requirement.Client ,c, pipeline), connection);
-                            requirement.estado = _configuration.GetSection("status_expanded").Value;                           
+                            requirement.status = _configuration.GetSection("status_expanded").Value;                           
                             NatsRequest request = SetNatsRequest(idrequirement, subrequestId, _configuration.GetSection("event_request_expanded").Value);
 
                             _templateLogDomain.GenerateLog($"{ResourceApp.LogMessageRequirement} {response.template.syncId} {ResourceApp.LogMessageRequirementComplement}");
-                             var res = await _sendEtl.SendRequirement(response.template);
+                             var res = await _sendEtl.SendMessage(response.template);
 
                             await _repository.Update(requirement, connection);
                             _templateLogDomain.GenerateLog($"{ResourceApp.RequirementUpdate} {requirement.id} {ResourceApp.RequirementUpdateComplement}");
@@ -188,7 +186,10 @@ namespace application.Services
             catch (Exception e)
             {
                 e.Message.ToString();
-                _templateLogDomain.GenerateLog($"Error: {e.Message}");  
+                Console.WriteLine(e.StackTrace);
+                _templateLogDomain.GenerateLog($"Error: {e.Message}");
+                throw;
+                 
             }
      
             return response;

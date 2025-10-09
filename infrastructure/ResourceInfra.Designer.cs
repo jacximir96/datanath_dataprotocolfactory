@@ -97,6 +97,15 @@ namespace infrastructure {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Requerimiento enviado con exito.
+        /// </summary>
+        internal static string MessageRequirementOk {
+            get {
+                return ResourceManager.GetString("MessageRequirementOk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Datos de conexión invalidos.
         /// </summary>
         internal static string SqlTestConnectionError {

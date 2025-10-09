@@ -37,7 +37,7 @@ namespace infrastructure.Repository
             }
             catch (Exception e)
             {
-                e.Message.ToString();
+                e.StackTrace.ToString();              
             }
             return collections;
         }

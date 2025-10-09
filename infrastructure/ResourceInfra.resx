@@ -129,6 +129,9 @@
   <data name="MessageRequirementComplement" xml:space="preserve">
     <value>enviado con exito</value>
   </data>
+  <data name="MessageRequirementOk" xml:space="preserve">
+    <value>Requerimiento enviado con exito</value>
+  </data>
   <data name="SqlTestConnectionError" xml:space="preserve">
     <value>Datos de conexión invalidos</value>
   </data>

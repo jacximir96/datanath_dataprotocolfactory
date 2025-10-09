@@ -19,7 +19,7 @@ namespace domain.Entities
         public List<Entity1> entities { get; set; }
         public string transformationKey { get; set; }
         public Target target { get; set; }
-        public string estado { get; set; }
+        public string status { get; set; }
         public List<string>? references { get; set; }
     }
 }

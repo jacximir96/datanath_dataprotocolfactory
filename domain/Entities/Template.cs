@@ -16,5 +16,6 @@ namespace domain.Entities
         public string syncId { get; set; }
         public int chunkLoad { get; set; }
         public Processes processes { get; set; }  
+        public List<string> references { get; set; }
     }
 }

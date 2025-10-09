@@ -2,6 +2,7 @@
 using domain.Interfaces;
 using domain.Repositories;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow.Schemas;
 using Microsoft.Extensions.Configuration;
 using PartitionKey = Microsoft.Azure.Cosmos.PartitionKey;
 
@@ -22,7 +23,7 @@ namespace infrastructure.Repository
       
         public async Task<Requirement> GetRequirement(string idrequirement, Connection connection)
         {
-            List<Requirement> transactions = new List<Requirement>();
+            List<Requirement> requirements = new List<Requirement>();
             try
             {             
                 using (CosmosClient cosmos = (CosmosClient)_connection.CreateConnection(connection.adapter).GetObjectDataBase(connection))
@@ -36,7 +37,7 @@ namespace infrastructure.Repository
                         while (result.HasMoreResults)
                         {
                             var _response = await result.ReadNextAsync();
-                            transactions.AddRange(_response.ToList());
+                            requirements.AddRange(_response.ToList());
                         }
                     }
                 }
@@ -46,7 +47,7 @@ namespace infrastructure.Repository
             {
                 e.Message.ToString();
             }
-            return transactions.FirstOrDefault();
+            return requirements.FirstOrDefault();
         }
 
         public async Task Update(Requirement requirement, Connection connection)
@@ -56,17 +57,26 @@ namespace infrastructure.Repository
 
                 using (CosmosClient cosmos = (CosmosClient)_connection.CreateConnection(connection.adapter).GetObjectDataBase(connection))
                 {
-                    var container = cosmos.GetDatabase(_configuration.GetSection("cosmosdb").Value).GetContainer(_configuration.GetSection("subrequestcontainer").Value);
+                    var container = cosmos.GetDatabase(_configuration.GetSection("cosmosdb").Value).GetContainer(_configuration.GetSection("requirementcontainer").Value);
+
+                    var response = await container.ReadItemAsync<Requirement>(
+                            requirement.id,
+                            new PartitionKey(requirement.id)
+                         );
+
+                     Requirement _requirement = response.Resource;
+                    _requirement.status = requirement.status;
+                    _requirement.references = requirement.references;
 
                     await container.ReplaceItemAsync(
-                                    item: requirement,
-                                    id: requirement.id,
+                                    item: _requirement,
+                                    id: _requirement.id,
                     partitionKey: new PartitionKey(requirement.id));
                 }
             }
             catch (Exception e)
             {
-                e.Message.ToString();
+                e.Message.ToString();              
             }
         }
 

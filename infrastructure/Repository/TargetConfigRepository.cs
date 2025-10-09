@@ -52,7 +52,7 @@ namespace infrastructure.Repository
             }
             catch (Exception e)
             {
-                e.Message.ToString();
+                e.Message.ToString();            
             }
             return collections.FirstOrDefault();
         }

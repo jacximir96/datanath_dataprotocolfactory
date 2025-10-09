@@ -10,5 +10,6 @@ namespace domain.Interfaces
     public interface ISendEtl
     {
         Task<ResponseDomain> SendRequirement(Template template);
+        Task<ResponseDomain> SendMessage(Template template);
     }
 }

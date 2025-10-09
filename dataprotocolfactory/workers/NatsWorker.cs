@@ -15,8 +15,7 @@ namespace dataprotocolfactory.workers
     {
         private readonly IRequirement _requirement;
         private readonly IConfiguration _config;
-        private readonly INatsConnection _nats;
-        private readonly  ISubRequestCompleted _subRequestCompleted;
+        private readonly INatsConnection _nats;      
         public NatsWorker(IRequirement requirement, IConfiguration config)
         {          
             _requirement = requirement;
@@ -28,7 +27,6 @@ namespace dataprotocolfactory.workers
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
    
-            //await foreach (var msg in _nats.SubscribeAsync<string>(_config.GetSection("subject_request_created").Value, cancellationToken: stoppingToken))
             await foreach (var msg in _nats.SubscribeAsync<string>("subject.>", cancellationToken: stoppingToken))
             {
                 if (msg.Subject == "subject.REQUEST_CREATED") 
@@ -37,11 +35,6 @@ namespace dataprotocolfactory.workers
                     await Task.Delay(1000, stoppingToken);
                 }
 
-                if(msg.Subject == "subject.SUBREQUEST_COMPLETED") 
-                {
-                    var json= JsonSerializer.Serialize(msg.Data); 
-                    SubRequestCompleted sub = JsonSerializer.Deserialize<SubRequestCompleted>(json);
-                }
             }                               
         }
 

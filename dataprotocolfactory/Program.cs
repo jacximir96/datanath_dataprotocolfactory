@@ -44,7 +44,6 @@ builder.Services.AddScoped<IEntityRepository<Entity1>, EntityRepository>();
 builder.Services.AddScoped<ITransFormRepository<Transform>, TransFormRepository>();
 builder.Services.AddScoped<ITargetConfigRepository, TargetConfigRepository>();
 builder.Services.AddScoped<ISubRequestRepository<SubRequest>, SubRequestRepository>();
-builder.Services.AddScoped<ISubRequestCompleted, SubRequestCompletedService>();
 var app = builder.Build();
 auxApp.Services.AddEndpointsApiExplorer();
 auxApp.Services.AddSwaggerGen();
