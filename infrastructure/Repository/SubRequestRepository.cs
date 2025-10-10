@@ -67,6 +67,5 @@ namespace infrastructure.Repository
                 e.Message.ToString();               
             }
         }
-
     }
 }

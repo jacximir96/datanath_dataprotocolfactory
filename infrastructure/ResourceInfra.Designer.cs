@@ -106,6 +106,15 @@ namespace infrastructure {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Mensaje enviado con exito.
+        /// </summary>
+        internal static string MessageSentOk {
+            get {
+                return ResourceManager.GetString("MessageSentOk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Datos de conexión invalidos.
         /// </summary>
         internal static string SqlTestConnectionError {
@@ -120,6 +129,15 @@ namespace infrastructure {
         internal static string SqlTestConnectionOk {
             get {
                 return ResourceManager.GetString("SqlTestConnectionOk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to conexión exitosa.
+        /// </summary>
+        internal static string TestConnectionBlobStirageOk {
+            get {
+                return ResourceManager.GetString("TestConnectionBlobStirageOk", resourceCulture);
             }
         }
         

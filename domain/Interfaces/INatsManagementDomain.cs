@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace domain.Interfaces
 {
-    public interface ISendEtl
+    public interface INatsManagementDomain
     {
-        Task<ResponseDomain> SendMessage(Template template);
+        Task<ResponseDomain> SendMessage(Template template, NatsRequest request);
     }
 }

@@ -10,13 +10,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
 
 namespace infrastructure.Adapter
 {
-    public class TestConnection : ITestConnection
+    public class TestConnection : ITestConnection, IResponseDomain
     {
       
         private readonly IConnectionFactoryDomain _connectionFactoryDomain;
@@ -39,6 +40,7 @@ namespace infrastructure.Adapter
                     await con.OpenAsync();                
                     response.Error = false;
                     response.Message = ResourceInfra.SqlTestConnectionOk;
+                    return response;
                 }
             }
             catch (Exception e)
@@ -48,7 +50,6 @@ namespace infrastructure.Adapter
                 return response;
             }
 
-            return response;
         }
 
         public async Task<ResponseDomain> GetCosmosTestConnection( 
@@ -70,33 +71,51 @@ namespace infrastructure.Adapter
                             var _response = await result.ReadNextAsync();
                         }
                     }
-                    response.Error = false;
-                    response.Message = ResourceInfra.CosmosTestConnectionOk;
+                    response = GetResponse(ResourceInfra.CosmosTestConnectionOk, true);
+                    return response;    
 
                 }
-                return await Task.FromResult(response);
+              
             }
             catch (Exception e) 
-            { 
-                response.Error= true;
-                response.Message = ResourceInfra.CosmosTestConnectionError;
+            {
+                response = GetResponse(ResourceInfra.CosmosTestConnectionError, false);             
                 return response;
             }
         }
 
         public async Task<ResponseDomain> GetBlobStorageConnection(Connection connection) 
         {
-            ResponseDomain response = new ResponseDomain(); 
+            ResponseDomain response = null; 
             try
             {
                 BlobContainerClient client = (BlobContainerClient)_connectionFactoryDomain.CreateConnection(connection.adapter).GetObjectDataBase(connection);
-                response.Error = false;
+                response = GetResponse(ResourceInfra.TestConnectionBlobStirageOk,true);
+                return response;
             }
             catch (Exception e) 
             {
-                response.Error = true;
+                response = GetResponse(e.Message,false);
                 return response;
             }  
+        }
+
+        public ResponseDomain GetResponse(string message, bool isSuccess)
+        {
+            ResponseDomain response = new ResponseDomain();
+            if (isSuccess)
+            {
+                response.Message = message;
+                response.StatusCode = HttpStatusCode.OK;
+                response.Error = false;
+            }
+            else
+            {
+                response.Message = message;
+                response.StatusCode = HttpStatusCode.BadRequest;
+                response.Error = true;
+            }
+
             return response;
         }
     }

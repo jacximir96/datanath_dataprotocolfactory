@@ -132,11 +132,17 @@
   <data name="MessageRequirementOk" xml:space="preserve">
     <value>Requerimiento enviado con exito</value>
   </data>
+  <data name="MessageSentOk" xml:space="preserve">
+    <value>Mensaje enviado con exito</value>
+  </data>
   <data name="SqlTestConnectionError" xml:space="preserve">
     <value>Datos de conexión invalidos</value>
   </data>
   <data name="SqlTestConnectionOk" xml:space="preserve">
     <value>La conexión fué exitosa</value>
+  </data>
+  <data name="TestConnectionBlobStirageOk" xml:space="preserve">
+    <value>conexión exitosa</value>
   </data>
   <data name="TypeConnectionCosmos" xml:space="preserve">
     <value>MongoLocal</value>

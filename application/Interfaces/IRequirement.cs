@@ -11,7 +11,6 @@ namespace application.Interfaces
     {
         Task<ResponseDomain> GetRequirement(string idrequirement);     
         Task<ResponseDomain> ValidateSqlConnection(Connection connection);
-        Task<ResponseDomain> ValidateBlobStorageConnection(Connection connection);
-        ResponseDomain GetResponse(string message, bool isSuccess);
+        Task<ResponseDomain> ValidateBlobStorageConnection(Connection connection);       
     }
 }

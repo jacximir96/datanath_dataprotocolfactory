@@ -26,6 +26,7 @@ namespace application.Services
         private readonly ITransFormRepository<Transform> _transFormRepo;
         private readonly ITargetConfigRepository _targetConfigRepo;     
         private readonly IMemoryCache _cache;
+        private readonly IResponseDomain _responseDomain;
 
         public RequirementService(
             IGenericRepository<Requirement> repository,
@@ -38,7 +39,8 @@ namespace application.Services
             ITransFormRepository<Transform> transFormRepo,
             ITargetConfigRepository targetConfigRepo,
             ISubRequestRepository<SubRequest> subRequestRepo,           
-            IMemoryCache cache
+            IMemoryCache cache,
+            IResponseDomain responseDomain
             ) 
         { 
             _repository = repository;
@@ -52,6 +54,7 @@ namespace application.Services
             _transFormRepo = transFormRepo; 
             _subRequestRepo = subRequestRepo;           
             _cache = cache;
+            _responseDomain = responseDomain;
                       
         }
 
@@ -185,10 +188,8 @@ namespace application.Services
             }
             catch (Exception e)
             {
-                e.Message.ToString();
-                Console.WriteLine(e.StackTrace);
-                _templateLogDomain.GenerateLog($"Error: {e.Message}");
-                throw;
+                response = _responseDomain.GetResponse(e.Message,false);
+                return response;
                  
             }
      
@@ -213,24 +214,6 @@ namespace application.Services
             return res;
         }
 
-        public ResponseDomain GetResponse(string message, bool isSuccess)
-        {
-            ResponseDomain response = new ResponseDomain();
-            if (isSuccess)
-            {
-                response.Message = message;
-                response.StatusCode = HttpStatusCode.OK;
-                response.Error = false;
-            }
-            else
-            {
-                response.Message = message;
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.Error = true;
-            }
-
-            return response;
-        }
 
         private ExtractConfiguration SetExtractConfiguration(Origin s) 
         {
@@ -350,7 +333,7 @@ namespace application.Services
             ) 
         {
             ResponseDomain res = null;
-            if (adapter == "MongoLocal")
+            if (adapter == _configuration.GetSection("adapterMongoLocal").Value)
             {
                 connection = SetConnection(connection.server,connection.adapter,connection.user,connection.password,connection.port);
                 res= await ValidateCosmosConnection(connection);
@@ -360,7 +343,7 @@ namespace application.Services
             }
             else
             {
-                if (adapter == "SqlServerSP")
+                if (adapter == _configuration.GetSection("adapterSqlServerSP").Value)
                 {
                     connection = SetConnection(server, adapter, user, password, port);
                     res = await ValidateSqlConnection(connection);   
@@ -369,7 +352,7 @@ namespace application.Services
                     response.Message= res.Message; 
                 }
 
-                if (adapter == "blobStorage")
+                if (adapter == _configuration.GetSection("adapterblobStorage").Value)
                 {
                     connection = SetConnection(server, adapter, user, password, port);
                     connection.sasToken = sasToken;

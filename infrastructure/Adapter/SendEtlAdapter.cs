@@ -20,34 +20,6 @@ namespace infrastructure.Adapter
             _configuration = configuration;
         }
 
-        public async Task<ResponseDomain> SendRequirement(Template template)
-        {
-            dynamic _response=null;
-            try
-            {             
-                    using (var client = new HttpClient())
-                    {
-                        var request = new HttpRequestMessage(HttpMethod.Post, _configuration.GetSection("urletl").Value);
-                        var json = JsonConvert.SerializeObject(template);
-                        var content = new StringContent(json, null, "application/json");
-                        request.Content = content;
-                        var response = await client.SendAsync(request);
-                        response.EnsureSuccessStatusCode();
-                        string j = await response.Content.ReadAsStringAsync();                       
-                        ResponseDomain responseDomain = new ResponseDomain();
-                        responseDomain.data = j;
-                        responseDomain.Message = $"{ResourceInfra.MessageRequirement} {template.syncId} {ResourceInfra.MessageRequirementComplement}";
-                        response.StatusCode=System.Net.HttpStatusCode.OK;
-                }
-
-            }
-            catch (Exception e) 
-            {
-                e.Message.ToString();
-            }
-
-            return _response;
-        }
 
         public async Task<ResponseDomain> SendMessage(Template template) 
         {

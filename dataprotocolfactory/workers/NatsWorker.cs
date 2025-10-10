@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NATS.Client;
 using NATS.Client.Core;
+using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,16 +27,23 @@ namespace dataprotocolfactory.workers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-   
-            await foreach (var msg in _nats.SubscribeAsync<string>("subject.>", cancellationToken: stoppingToken))
+            try
             {
-                if (msg.Subject == "subject.REQUEST_CREATED") 
+                await foreach (var msg in _nats.SubscribeAsync<string>(_config.GetSection("prefixsubjects").Value, cancellationToken: stoppingToken))
                 {
-                    _requirement.GetRequirement(msg.Data);
-                    await Task.Delay(1000, stoppingToken);
-                }
+                    if (msg.Subject == "subject.REQUEST_CREATED")
+                    {
+                        _requirement.GetRequirement(msg.Data);
+                        await Task.Delay(1000, stoppingToken);
+                    }
 
-            }                               
+                }
+            }
+            catch (Exception e)
+            { 
+              Console.WriteLine(e.StackTrace);    
+            }
+                              
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
