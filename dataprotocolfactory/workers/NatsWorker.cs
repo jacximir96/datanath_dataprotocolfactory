@@ -31,7 +31,7 @@ namespace dataprotocolfactory.workers
             {
                 await foreach (var msg in _nats.SubscribeAsync<string>(_config.GetSection("prefixsubjects").Value, cancellationToken: stoppingToken))
                 {
-                    if (msg.Subject == "subject.REQUEST_CREATED")
+                    if (msg.Subject ==_config.GetSection("event_request_created").Value)
                     {
                         _requirement.GetRequirement(msg.Data);
                         await Task.Delay(1000, stoppingToken);
